@@ -1,7 +1,7 @@
+import os
 import cv2
 import numpy as np
-import argparse
-import os
+
 
 def get_new_size(original_width, original_height):
     """
@@ -30,7 +30,7 @@ def get_new_size(original_width, original_height):
 
 def decode_predictions(scores, geometry, image_width, image_height, min_confidence=0.2, width_threshold=0.2):
     """
-    Декодирует предсказания модели EAST с улучшенными параметрами для латинского текста.
+    Декодирует предсказания модели EAST.
     """
     (numRows, numCols) = scores.shape[2:4]
     boxes = []
@@ -119,24 +119,7 @@ def merge_boxes(boxes, confidences, overlap_threshold=0.3, max_dist=50):
 
     return merged_boxes, merged_conf
 
-def read_data_file():
-    """
-    Читает путь к файлу из аргументов командной строки.
-    """
-    parser = argparse.ArgumentParser()
-    parser.add_argument('file_path', type=str)
-    args = parser.parse_args()
-    
-    if not os.path.exists(args.file_path):
-        raise FileNotFoundError(f"Файл не найден: {args.file_path}")
-    
-    # Проверяем, что это файл, а не директория
-    if not os.path.isfile(args.file_path):
-        raise ValueError(f"Указанный путь ведет к директории, а не к файлу: {args.file_path}")
-    
-    return args.file_path
-
-def draw_boxes_and_save(image, boxes, confidences, scale_factors, output_path="results/output_image.jpg"):
+def draw_boxes_and_save(image, boxes, confidences, scale_factors, output_path = "results/out_image.jpg"):
     """
     Рисует bounding boxes на изображении и сохраняет результат.
     """
@@ -181,11 +164,27 @@ def main():
     """
     Основная функция для обработки изображения и обнаружения текста.
     """
+    input_data = input().split()
+    
+    if len(input_data) < 1:
+        print("Ошибка: Не указан путь к входному изображению")
+        return
+    
+    image_path = input_data[0]
+    
+    if len(input_data) > 1:
+        file_out_image = input_data[1]
+    else:
+        file_out_image = "results/out_image.jpg"
+    
+    # Создаем директорию для результата, если ее нет
+    output_dir = os.path.dirname(file_out_image)
+    if output_dir and not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        print(f"Создана директория: {output_dir}")
+    
     # Путь к модели
     EAST_MODEL_PATH = "models/frozen_east_text_detection.pb"
-    
-    # Читаем путь к изображению
-    image_path = read_data_file()
 
     # Загружаем изображение
     image = cv2.imread(image_path)
@@ -206,8 +205,7 @@ def main():
     net = cv2.dnn.readNet(EAST_MODEL_PATH)
 
     # Подготавливаем blob
-    blob = cv2.dnn.blobFromImage(image_resized, 1.0, (W_new, H_new), 
-                                (123.68, 116.78, 103.94), swapRB=True, crop=False)
+    blob = cv2.dnn.blobFromImage(image_resized, 1.0, (W_new, H_new), (123.68, 116.78, 103.94), swapRB=True, crop=False)
     net.setInput(blob)
     layerNames = ["feature_fusion/Conv_7/Sigmoid", "feature_fusion/concat_3"]
     mapOutputs = net.forward(layerNames)
@@ -237,9 +235,10 @@ def main():
         
         # Рисуем и сохраняем результат
         scale_factors = (W / float(W_new), H / float(H_new))
-        draw_boxes_and_save(orig, merged_boxes, merged_conf, scale_factors)
+        draw_boxes_and_save(orig, merged_boxes, merged_conf, scale_factors, file_out_image)
     else:
         print("Текст не обнаружен на изображении")
 
 if __name__ == "__main__":
+
     main()

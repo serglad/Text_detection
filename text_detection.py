@@ -296,8 +296,7 @@ def main():
 
         net = cv2.dnn.readNet(EAST_MODEL_PATH)
 
-        blob = cv2.dnn.blobFromImage(image_resized, 1.0, (W_new, H_new), 
-                                   (123.68, 116.78, 103.94), swapRB=True, crop=False)
+        blob = cv2.dnn.blobFromImage(image_resized, 1.0, (W_new, H_new), (123.68, 116.78, 103.94), swapRB=True, crop=False)
         net.setInput(blob)
         layerNames = ["feature_fusion/Conv_7/Sigmoid", "feature_fusion/concat_3"]
         mapOutputs = net.forward(layerNames)

@@ -50,12 +50,12 @@ bash
 Структура проекта
 text
 
-project/
-├── models/
-│   └── frozen_east_text_detection.pb  # Модель EAST
-├── results/                           # Директория для результатов
-│   └── input_images/                  # Входные и выходные изображения
-└── text_detection.py                  # Основной скрипт
+    project/
+    ├── models/
+    │   └── frozen_east_text_detection.pb  # Модель EAST
+    ├── results/                           # Директория для результатов
+    │   └── input_images/                  # Входные и выходные изображения
+    └── text_detection.py                  # Основной скрипт
 
 Поддерживаемые форматы изображений
 

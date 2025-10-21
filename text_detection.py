@@ -240,7 +240,7 @@ def draw_boxes_and_save(image, boxes, confidences, scale_factors, output_path="r
         raise ValueError(f"Ошибка отрисовки и сохранения: {str(e)}")
 
 
-def main():
+def main(image_in,image_out):
     """
     Основная функция для обработки изображения и обнаружения текста.
     
@@ -261,20 +261,7 @@ def main():
         Если произошла ошибка в процессе обработки изображения
     """
     try:
-        input_data = input().split()
-        
-        if len(input_data) < 1:
-            print("Ошибка: Не указан путь к входному изображению")
-            return
-        
-        image_path = input_data[0]
-        
-        if len(input_data) > 1:
-            file_out_image = input_data[1]
-        else:
-            file_out_image = "results/out_image.jpg"
-        
-        output_dir = os.path.dirname(file_out_image)
+        output_dir = os.path.dirname(image_out)
         if output_dir and not os.path.exists(output_dir):
             os.makedirs(output_dir)
             print(f"Создана директория: {output_dir}")
@@ -284,9 +271,9 @@ def main():
         if not os.path.exists(EAST_MODEL_PATH):
             raise FileNotFoundError(f"Модель не найдена: {EAST_MODEL_PATH}")
 
-        image = cv2.imread(image_path)
+        image = cv2.imread(image_in)
         if image is None:
-            raise ValueError(f"Не удалось загрузить изображение: {image_path}")
+            raise ValueError(f"Не удалось загрузить изображение: {image_in}")
         
         orig = image.copy()
         (H, W) = image.shape[:2]
@@ -318,7 +305,7 @@ def main():
             merged_boxes, merged_conf = merge_boxes(selected_boxes, selected_conf, max_dist=100)
             
             scale_factors = (W / float(W_new), H / float(H_new))
-            draw_boxes_and_save(orig, merged_boxes, merged_conf, scale_factors, file_out_image)
+            draw_boxes_and_save(orig, merged_boxes, merged_conf, scale_factors, image_out)
         else:
             print("Текст не обнаружен на изображении")
             
